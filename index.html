@@ -1,0 +1,332 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Программа расчёта кредита с аннуитетными платежами</title>
+		
+		<style>
+		 	body {
+		 		margin: 0;
+		 		font-size: 18px;
+		 		color: #333;
+		 		background: rgba(76, 175, 80, .2);
+		 		overflow-y: scroll;
+		 	}
+		 	header {
+		 		background: #63bf7f;
+		 		padding: 20px 0;
+		 	}
+		 	h1, h2 {
+		 		padding: 0;
+		 		margin: 0;
+		 		text-align: center;
+		 	}
+		 	.input-form {
+		 		width: 400px;
+		 		margin: 0 auto;
+		 		padding: 10px;
+		 	}
+			.input-form__row, .result-form__body-section {
+				margin: 10px 0;
+			}
+			.result-form__body-section {
+				display: inline-block;
+				text-align: center;
+				width: 49%;
+			}
+			.input-form__label {
+				width: 210px;
+				float: left;
+			}
+			.input-form__input {
+				text-align: right;
+			}
+			.input-form__submit {
+				padding: 10px 0;
+				text-align: center;
+			}
+			button {
+				background: #63bf7f;
+			    border: none;
+			    color: #333;
+			    padding: 10px 30px;
+			    width: 400px;
+			    font-size: 16px;
+			    font-weight: bold;
+			    font-size: 18px;
+    			font-family: -webkit-body;
+			}
+			button:hover {
+				background: rgba(76, 175, 80, .6);
+			    color: #333;
+			}
+			.result-form {
+				display: none;
+			}
+			.result-form__title {
+				text-align: center;
+				font-size: 24px;
+				font-weight: bold;
+
+			}
+			.result-form__body {
+				width: 400px;
+				margin: 0 auto;
+			}
+			table {
+				text-align: center;
+				padding-bottom: 50px;
+			}
+			th {
+				background: #63bf7f;
+			}
+			tr:nth-child(2n) {
+		    	background: rgba(76, 175, 80, .4);
+		   	} 
+		   	tr:nth-child(2n+1) {
+		    	background: rgba(76, 175, 80, .6);
+		   	}
+			tr:not(:first-child) :last-child {
+				cursor: pointer;
+			}
+		</style>
+
+	</head>
+	<body>
+		<header>
+			<h2>Задача #2</h2>
+			<h1>Программа расчёта кредита с аннуитетными платежами</h1>
+		</header>
+		
+		<div class="input-form">
+			<div class="input-form__row">
+				<div class="input-form__label">Сумма кредита, руб.</div>
+				<div class="input-form__input">
+					<input type="number" name="initialAmountS" value="1000000">
+				</div>
+			</div>
+			<div class="input-form__row">
+				<div class="input-form__label">Годовая ставка, %</div>
+				<div class="input-form__input">
+					<input type="number" name="interestRateP" value="12">
+				</div>
+			</div>
+			<div class="input-form__row">
+				<div class="input-form__label">Срок погашения, мес.</div>
+				<div class="input-form__input">
+					<input type="number" name="monthCountN" value="120">
+				</div>
+			</div>
+			<div class="input-form__row">
+				<div class="input-form__label">Ежемесячный платеж, руб.</div>
+				<div class="input-form__input">
+					<input type="number" name="monthPaymentX" disabled>
+				</div>
+			</div>
+			<div class="input-form__submit">
+				<button id="calculateButton">Построить график погашения кредита</button>
+			</div>
+		</div>
+
+		<div class="result-form">
+			<div class="result-form__title">Результаты расчета:</div>
+			<div class="result-form__body">
+				<div class="result-form__body-section">
+					<div class="result-form__body-section-title">Общая сумма выплат: </div>
+					<div class="result-form__body-section-val" id="total"></div>
+				</div>
+				<div class="result-form__body-section">
+					<div class="result-form__body-section-title">Удорожание покупки: </div>
+					<div class="result-form__body-section-val" id="overcost"></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="credit-table">
+			<table>
+				<tbody>
+					
+				</tbody>
+			</table>
+		</div>
+	</body>
+</html>
+
+<script>
+window.onload = function() {
+
+	var initialAmountS = document.getElementsByName('initialAmountS')[0],
+		interestRateP = document.getElementsByName('interestRateP')[0],
+		monthCountN = document.getElementsByName('monthCountN')[0];
+		monthPaymentX = document.getElementsByName('monthPaymentX')[0];
+
+	function getMonthPayment (S, P, N) {
+		return S*(P + (P / ( Math.pow((1 + P), N) - 1)));
+	}
+
+	function updateMonthPayment() {
+		S = initialAmountS.value;
+		P = interestRateP.value / 12 * 0.01;
+		N = monthCountN.value;
+
+		monthPaymentX.value = getMonthPayment(S, P, N).toFixed(2);
+	}
+
+	updateMonthPayment();
+
+	initialAmountS.oninput = function() {
+		updateMonthPayment();
+	} 
+	interestRateP.oninput = function() {
+		updateMonthPayment();
+	}
+	monthCountN.oninput = function() {
+		updateMonthPayment();
+	}
+
+	document.getElementById('calculateButton').onclick = function() {
+		var resultForm = document.getElementsByClassName('result-form')[0],
+			tbody = document.getElementsByTagName('tbody')[0],
+			interestRate = interestRateP.value / 12 * 0.01;
+			initialAmount = initialAmountS.value,
+			monthPayment = monthPaymentX.value,
+			monthCount = monthCountN.value;
+			balance = initialAmount,
+			sumAmortization = 0,
+			sumCurrentPercent = 0,
+			sumMonthPayment = 0;
+
+		resultForm.style.display = 'block';
+
+		tbody.innerHTML = '<tr>'+
+							'<th>Порядковый номер месяца</th>'+
+							'<th>Платеж в счет погашения основного долга, руб</th>'+
+							'<th>Проценты по кредиту, руб</th>'+
+							'<th>Общий ежемесячный платеж, руб</th>'+
+							'<th>Остаток осн. долга после совершения текущего платежа, руб</th>'+
+							'<th>Досрочное погашение (сверх ежемесячного платежа)</th>'+
+						'</tr>';
+
+		for (var i = 1; i <= monthCount; i++) {
+			var row = document.createElement('tr'),
+				currentPercent = balance * interestRate,
+				amortization;
+
+			currentPercent = currentPercent.toFixed(2);
+
+			if (i == monthCount) {
+				amortization = balance;
+				monthPayment = Number(amortization) + Number(currentPercent);
+				monthPayment = monthPayment.toFixed(2);
+			}
+			else {
+				amortization = monthPayment - currentPercent;
+				amortization = amortization.toFixed(2);
+			}
+
+			balance = balance - amortization;
+			balance = balance.toFixed(2);
+
+			var td1 = document.createElement('td');
+			td1.appendChild(document.createTextNode(i + ' мес.'));
+
+			var td2 = document.createElement('td'); 
+			td2.appendChild(document.createTextNode(amortization));
+			sumAmortization += Number(amortization);
+
+			var td3 = document.createElement('td');
+			td3.appendChild(document.createTextNode(currentPercent));
+			sumCurrentPercent += Number(currentPercent);
+
+			var td4 = document.createElement('td');
+			td4.appendChild(document.createTextNode(monthPayment));
+			sumMonthPayment += Number(monthPayment);
+
+			var td5 = document.createElement('td');
+			td5.appendChild(document.createTextNode(balance));
+
+			var td6 = document.createElement('td');
+			td6.appendChild(document.createTextNode('0'));
+
+			row.appendChild(td1);
+			row.appendChild(td2);
+			row.appendChild(td3);
+			row.appendChild(td4);
+			row.appendChild(td5);
+			row.appendChild(td6);
+
+			tbody.appendChild(row);
+		}
+
+		document.getElementById('total').innerHTML = sumMonthPayment.toFixed(2);
+		document.getElementById('overcost').innerHTML = sumCurrentPercent.toFixed(2);
+
+		var prepayment = document.getElementsByTagName('tr');
+		
+		for (var i = 1; i < prepayment.length; i++) {
+			var prepaymentCell = prepayment[i].lastChild;
+
+			prepaymentCell.onclick = function () {
+				var inputPrepayment = prompt('Укажите сумму, которую Вы хотите внести дополнительно в счет погашения основного долга', this.innerHTML);
+
+				if (isNaN(inputPrepayment) || inputPrepayment == '') {
+					this.innerHTML = '0';
+				}
+				else {
+					this.innerHTML = inputPrepayment;
+					var newPrepayment = document.getElementsByTagName('tr');
+
+					interestRate = interestRateP.value / 12 * 0.01;
+					initialAmount = initialAmountS.value,
+					monthPayment = monthPaymentX.value,
+					monthCount = monthCountN.value;
+					balance = initialAmount;
+					
+					for (var j = 1; j < newPrepayment.length; j++) {
+						var newPrepaymentCell = newPrepayment[j].lastChild,
+						prepaymentVal = newPrepaymentCell.innerHTML;
+
+						var currentPercent = balance * interestRate,
+							amortization;
+
+						currentPercent = currentPercent.toFixed(2);
+
+						if (j == monthCount) {
+							amortization = balance;
+							monthPayment = Number(amortization) + Number(currentPercent);
+							monthPayment = monthPayment.toFixed(2);
+						}
+						else {
+							amortization = monthPayment - currentPercent;
+							amortization = amortization.toFixed(2);
+						}
+
+						balance = balance - amortization - prepaymentVal;
+						balance = balance.toFixed(2);
+
+						var tr = document.getElementsByTagName('tr')[j];
+
+						var td2 = tr.children[1];
+						td2.innerHTML = amortization;
+
+						var td3 = tr.children[2];
+						td3.innerHTML = currentPercent;
+
+						var td4 = tr.children[3];
+						td4.innerHTML = monthPayment;
+
+						var td5 = tr.children[4];
+						td5.innerHTML = balance;
+
+						if (prepaymentVal > 0) {
+							monthPayment = getMonthPayment(balance, interestRate, monthCount-j).toFixed(2);
+						}
+					}
+				}
+			}
+		}
+
+	}
+}
+
+</script>
